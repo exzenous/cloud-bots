@@ -2,6 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Parameters:
+  Environment:
+    Type: String
+    Description: Deploy CloudBot for which Envionment
+    Default: ''
   DataCenter:
     Description: The Data Center your CloudGuard account is being run on
     Type: String
@@ -64,8 +68,8 @@ Resources:
   InputTopic:
     Type: "AWS::SNS::Topic"
     Properties:
-      DisplayName: 'd9-findings'
-      TopicName: 'd9-findings'
+      DisplayName: !Join [ '-', [ 'd9-findings', !Ref Environment ] ]
+      TopicName: !Join [ '-', [ 'd9-findings', !Ref Environment ] ]
 
   InputTopicPolicy:
     Type: AWS::SNS::TopicPolicy
@@ -92,8 +96,8 @@ Resources:
   OutputTopic:
     Type: "AWS::SNS::Topic"
     Properties:
-      DisplayName: 'remediationOutput'
-      TopicName: 'remediationOutput'
+      DisplayName: !Join [ '-', [ 'remediationOutput', !Ref Environment ] ]
+      TopicName: !Join [ '-', [ 'remediationOutput', !Ref Environment ] ]
 
   OutputTopicSubscription:
     Type: AWS::SNS::Subscription
@@ -106,10 +110,10 @@ Resources:
   RemediationFunction:
     Type: "AWS::Serverless::Function"
     Properties:
-      FunctionName: Dome9CloudBots
+      FunctionName: !Join [ '-', [ 'Dome9CloudBots', !Ref Environment ] ]
       Description: 'Auto-remediation actions from Dome9 events'
       CodeUri:
-        Bucket: !Join [ '' , [ 'dome9cloudbotsemplates' , !Join [ '', !Split [ "-" , !Ref "AWS::Region" ] ] ] ]
+        Bucket: !Join [ '' , [ 'dome9cloudbotsemplates' , !Join [ '', !Split [ "-" , !Ref "AWS::Region" ] ]] ]
         Key: cloudbots.zip
       Runtime: python3.9
       Timeout: 120 # Most will be under 8 seconds, but delete IGW needs to wait for the instances to be off before detaching from the VPC. This takes a bunch of time.
@@ -182,6 +186,8 @@ Resources:
                 - iam:DetachRolePolicy # for iam_detach_policy
                 - iam:DetachUserPolicy # for iam_detach_policy
                 - iam:DeletePolicy # for iam_user_delete_inline_policies
+                - iam:ListAccessKeys
+                - iam:GetAccessKeyLastUsed
                 - iam:DeleteAccessKey # for the delete_access_key
                 - iam:GetPolicy # for iam_detach_policy
                 - iam:ListEntitiesForPolicy # for iam_detach_policy
@@ -268,7 +274,6 @@ Resources:
           Type: SNS
           Properties:
             Topic: !Ref InputTopic
-
 
 Outputs:
   InputTopicARN:
