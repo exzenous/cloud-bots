@@ -41,7 +41,7 @@ def run_action(boto_session, rule, entity, params):
     # default days is 90
     max_days_unused_time = params[0] if params else 90
     # Create an IAM client
-    iam_client = boto3.client('iam')
+    iam_client = boto_session.client('iam')
 
     # -----------------------  Deactivate unused access keys ----------------------------------#
     try:

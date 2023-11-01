@@ -23,15 +23,15 @@ from botocore.exceptions import ClientError
 
 PROPERTIES = ['MinimumPasswordLength', 'RequireSymbols', 'RequireNumbers', 'RequireUppercaseCharacters',
               'RequireLowercaseCharacters', 'AllowUsersToChangePassword', 'MaxPasswordAge', 'PasswordReusePrevention',
-              'HardExpiry', 'function_arn']
+              'HardExpiry', 'exec_function_arn', 'assumed_role_arn']
 
 
 def run_action(boto_session, rule, entity, params):
     # Create IAM client
     iam_client = boto_session.client('iam')
-
+    
     if len(params) < 9:  # We need to make sure we have the exact amount of values for all of these properties.
-        text_output = f"{len(params)} Are you sure ALL password policy properties were set? \n " \
+        text_output = "Are you sure ALL password policy properties were set? \n " \
                       "MinimumPasswordLength=int, \n RequireSymbols=True|False, \n RequireNumbers=True|False, " \
                       "\n RequireUppercaseCharacters=True|False, \n RequireLowercaseCharacters=True|False, " \
                       "\n AllowUsersToChangePassword=True|False, \n MaxPasswordAge=int, \n PasswordReusePrevention=int, " \

@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  DeployedCloudBotAccountId:
+    Description: Account ID where CloudBot was deployed
+    Type: String
+    Default: ""
+  Environment:
+    Description: Environment NonProd/Prod
+    Type: String
+    Default: ""
+
+Resources:
+
+  Dome9CloudBotsIamPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Roles: 
+        - !Ref Dome9CloudBotsIamRole
+      PolicyName: !Join [ "-", ["Dome9CloudBots", !Ref Environment]]
+      PolicyDocument: {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "CloudSupervisor",
+                    "Effect": "Allow",
+                    "Action": [
+                        "ec2:DescribeSecurityGroups",
+                        "ec2:RevokeSecurityGroupEgress",
+                        "ec2:RevokeSecurityGroupIngress",
+                        "iam:GetUser",
+                        "iam:ListAccessKeys",
+                        "iam:GetAccessKeyLastUsed",
+                        "iam:UpdateAccessKey",
+                        "iam:DeleteLoginProfile",
+                        "iam:UpdateAccountPasswordPolicy",
+                        "iam:UpdateLoginProfile",
+                        "sns:Publish",
+                        "sns:CreateTopic",
+                        "sns:Subscribe",
+                        "sts:GetCallerIdentity",
+                        "sts:AssumeRole",
+                    ],
+                    "Resource": "*"
+                }
+            ]
+        }
+
+
+  Dome9CloudBotsIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join [ "-", ["Dome9CloudBots", !Ref Environment]]
+      AssumeRolePolicyDocument: {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": !Join ["", ["arn:aws:iam::", !Ref DeployedCloudBotAccountId, ":root"]]
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        }

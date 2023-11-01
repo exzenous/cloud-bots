@@ -17,7 +17,7 @@ def run_action(boto_session, rule, entity, params):
     text_output = 'Start iam_user_disable_console_password; '
     username = entity['name']
     # Create an IAM resource
-    iam_client = boto3.client('iam')
+    iam_client = boto_session.client('iam')
 
     # ----------------------- Disable Console Password ----------------------------------#
     try:
